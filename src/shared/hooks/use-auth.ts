@@ -3,6 +3,9 @@ import { supabase } from '@/shared/lib/supabase'
 import { useAuthStore } from '@/shared/stores/auth-store'
 import type { Profile } from '@/types/domain'
 
+// Seconds before we force-unlock the UI if Supabase never responds.
+const AUTH_INIT_TIMEOUT_MS = 8_000
+
 async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
@@ -17,7 +20,14 @@ export function useAuthInit() {
   const { setSession, setProfile, setLoading, reset } = useAuthStore()
 
   useEffect(() => {
+    // Safety net: if getSession never resolves (stale SW, network issue, etc.)
+    // we release the loading lock so the UI never freezes permanently.
+    const timeout = setTimeout(() => {
+      setLoading(false)
+    }, AUTH_INIT_TIMEOUT_MS)
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(timeout)
       setSession(session)
       if (session?.user) {
         const profile = await fetchProfile(session.user.id)
@@ -37,7 +47,10 @@ export function useAuthInit() {
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [setSession, setProfile, setLoading, reset])
 }
 
