@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
+    /*
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png', 'robots.txt'],
@@ -39,7 +40,7 @@ export default defineConfig({
           },
         ],
       },
-    }),
+    }),*/
   ],
   resolve: {
     alias: {
