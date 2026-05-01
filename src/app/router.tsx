@@ -5,6 +5,7 @@ import { RootRedirect } from './root-redirect'
 // Auth pages
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { ForgotPasswordPage } from '@/features/auth/pages/forgot-password-page'
+import { SignupPage } from '@/features/auth/pages/signup-page'
 
 // Employee pages
 import { EmployeeDashboardPage } from '@/features/employee/pages/employee-dashboard-page'
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
   {
     path: '/forgot-password',
     element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+  },
+  {
+    path: '/signup',
+    element: <PublicRoute><SignupPage /></PublicRoute>,
   },
 
   // Employee

@@ -91,7 +91,13 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          ¿Empleado nuevo?{' '}
+          <Link to="/signup" className="text-primary hover:underline">
+            Crea tu cuenta
+          </Link>
+        </p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
           Horario © {new Date().getFullYear()} — Control horario laboral
         </p>
       </div>
