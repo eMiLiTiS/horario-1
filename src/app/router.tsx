@@ -1,37 +1,43 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RoleGuard, PublicRoute } from './role-guard'
 import { RootRedirect } from './root-redirect'
+import { LoadingState } from '@/shared/components/ui/states'
 
-// Auth pages
-import { LoginPage } from '@/features/auth/pages/login-page'
-import { ForgotPasswordPage } from '@/features/auth/pages/forgot-password-page'
-import { SignupPage } from '@/features/auth/pages/signup-page'
-
-// Employee pages
-import { EmployeeDashboardPage } from '@/features/employee/pages/employee-dashboard-page'
-import { ClockPage } from '@/features/employee/pages/clock-page'
-import { MySchedulePage } from '@/features/employee/pages/my-schedule-page'
-import { MyHistoryPage } from '@/features/employee/pages/my-history-page'
-import { MyProfilePage } from '@/features/employee/pages/my-profile-page'
-
-// Admin pages
-import { AdminDashboardPage } from '@/features/admin/pages/admin-dashboard-page'
-import { EmployeesPage } from '@/features/admin/pages/employees-page'
-import { EmployeeDetailPage } from '@/features/admin/pages/employee-detail-page'
-import { SchedulesPage } from '@/features/admin/pages/schedules-page'
-import { MonitorPage } from '@/features/admin/pages/monitor-page'
-import { IncidentsPage } from '@/features/admin/pages/incidents-page'
-import { ReportsPage } from '@/features/admin/pages/reports-page'
-import { SettingsPage } from '@/features/admin/pages/settings-page'
-
-// Superadmin pages
-import { SuperadminDashboardPage } from '@/features/superadmin/pages/superadmin-dashboard-page'
-import { CompaniesPage } from '@/features/superadmin/pages/companies-page'
-import { CompanyDetailPage } from '@/features/superadmin/pages/company-detail-page'
-
-// Layouts
+// Layouts — eager: small, needed immediately after auth resolves
 import { EmployeeShell } from '@/shared/components/layouts/employee-shell'
 import { AdminShell } from '@/shared/components/layouts/admin-shell'
+
+// Auth pages — lazy
+const LoginPage = lazy(() => import('@/features/auth/pages/login-page').then(m => ({ default: m.LoginPage })))
+const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/forgot-password-page').then(m => ({ default: m.ForgotPasswordPage })))
+const SignupPage = lazy(() => import('@/features/auth/pages/signup-page').then(m => ({ default: m.SignupPage })))
+
+// Employee pages — lazy
+const EmployeeDashboardPage = lazy(() => import('@/features/employee/pages/employee-dashboard-page').then(m => ({ default: m.EmployeeDashboardPage })))
+const ClockPage = lazy(() => import('@/features/employee/pages/clock-page').then(m => ({ default: m.ClockPage })))
+const MySchedulePage = lazy(() => import('@/features/employee/pages/my-schedule-page').then(m => ({ default: m.MySchedulePage })))
+const MyHistoryPage = lazy(() => import('@/features/employee/pages/my-history-page').then(m => ({ default: m.MyHistoryPage })))
+const MyProfilePage = lazy(() => import('@/features/employee/pages/my-profile-page').then(m => ({ default: m.MyProfilePage })))
+
+// Admin pages — lazy
+const AdminDashboardPage = lazy(() => import('@/features/admin/pages/admin-dashboard-page').then(m => ({ default: m.AdminDashboardPage })))
+const EmployeesPage = lazy(() => import('@/features/admin/pages/employees-page').then(m => ({ default: m.EmployeesPage })))
+const EmployeeDetailPage = lazy(() => import('@/features/admin/pages/employee-detail-page').then(m => ({ default: m.EmployeeDetailPage })))
+const SchedulesPage = lazy(() => import('@/features/admin/pages/schedules-page').then(m => ({ default: m.SchedulesPage })))
+const MonitorPage = lazy(() => import('@/features/admin/pages/monitor-page').then(m => ({ default: m.MonitorPage })))
+const IncidentsPage = lazy(() => import('@/features/admin/pages/incidents-page').then(m => ({ default: m.IncidentsPage })))
+const ReportsPage = lazy(() => import('@/features/admin/pages/reports-page').then(m => ({ default: m.ReportsPage })))
+const SettingsPage = lazy(() => import('@/features/admin/pages/settings-page').then(m => ({ default: m.SettingsPage })))
+
+// Superadmin pages — lazy
+const SuperadminDashboardPage = lazy(() => import('@/features/superadmin/pages/superadmin-dashboard-page').then(m => ({ default: m.SuperadminDashboardPage })))
+const CompaniesPage = lazy(() => import('@/features/superadmin/pages/companies-page').then(m => ({ default: m.CompaniesPage })))
+const CompanyDetailPage = lazy(() => import('@/features/superadmin/pages/company-detail-page').then(m => ({ default: m.CompanyDetailPage })))
+
+function withSuspense(node: React.ReactNode, fullPage = false) {
+  return <Suspense fallback={<LoadingState fullPage={fullPage} />}>{node}</Suspense>
+}
 
 export const router = createBrowserRouter([
   {
@@ -40,15 +46,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <PublicRoute><LoginPage /></PublicRoute>,
+    element: <PublicRoute>{withSuspense(<LoginPage />, true)}</PublicRoute>,
   },
   {
     path: '/forgot-password',
-    element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+    element: <PublicRoute>{withSuspense(<ForgotPasswordPage />, true)}</PublicRoute>,
   },
   {
     path: '/signup',
-    element: <PublicRoute><SignupPage /></PublicRoute>,
+    element: <PublicRoute>{withSuspense(<SignupPage />, true)}</PublicRoute>,
   },
 
   // Employee
@@ -56,11 +62,11 @@ export const router = createBrowserRouter([
     path: '/employee',
     element: <RoleGuard allow={['employee']}><EmployeeShell /></RoleGuard>,
     children: [
-      { index: true, element: <EmployeeDashboardPage /> },
-      { path: 'clock', element: <ClockPage /> },
-      { path: 'schedule', element: <MySchedulePage /> },
-      { path: 'history', element: <MyHistoryPage /> },
-      { path: 'profile', element: <MyProfilePage /> },
+      { index: true, element: withSuspense(<EmployeeDashboardPage />) },
+      { path: 'clock', element: withSuspense(<ClockPage />) },
+      { path: 'schedule', element: withSuspense(<MySchedulePage />) },
+      { path: 'history', element: withSuspense(<MyHistoryPage />) },
+      { path: 'profile', element: withSuspense(<MyProfilePage />) },
     ],
   },
 
@@ -69,14 +75,14 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: <RoleGuard allow={['admin']}><AdminShell /></RoleGuard>,
     children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: 'employees', element: <EmployeesPage /> },
-      { path: 'employees/:id', element: <EmployeeDetailPage /> },
-      { path: 'schedules', element: <SchedulesPage /> },
-      { path: 'monitor', element: <MonitorPage /> },
-      { path: 'incidents', element: <IncidentsPage /> },
-      { path: 'reports', element: <ReportsPage /> },
-      { path: 'settings', element: <SettingsPage /> },
+      { index: true, element: withSuspense(<AdminDashboardPage />) },
+      { path: 'employees', element: withSuspense(<EmployeesPage />) },
+      { path: 'employees/:id', element: withSuspense(<EmployeeDetailPage />) },
+      { path: 'schedules', element: withSuspense(<SchedulesPage />) },
+      { path: 'monitor', element: withSuspense(<MonitorPage />) },
+      { path: 'incidents', element: withSuspense(<IncidentsPage />) },
+      { path: 'reports', element: withSuspense(<ReportsPage />) },
+      { path: 'settings', element: withSuspense(<SettingsPage />) },
     ],
   },
 
@@ -85,11 +91,11 @@ export const router = createBrowserRouter([
     path: '/boss',
     element: <RoleGuard allow={['boss']}><AdminShell readOnly /></RoleGuard>,
     children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: 'employees', element: <EmployeesPage readOnly /> },
-      { path: 'schedules', element: <SchedulesPage readOnly /> },
-      { path: 'monitor', element: <MonitorPage /> },
-      { path: 'reports', element: <ReportsPage /> },
+      { index: true, element: withSuspense(<AdminDashboardPage />) },
+      { path: 'employees', element: withSuspense(<EmployeesPage readOnly />) },
+      { path: 'schedules', element: withSuspense(<SchedulesPage readOnly />) },
+      { path: 'monitor', element: withSuspense(<MonitorPage />) },
+      { path: 'reports', element: withSuspense(<ReportsPage />) },
     ],
   },
 
@@ -98,9 +104,9 @@ export const router = createBrowserRouter([
     path: '/superadmin',
     element: <RoleGuard allow={['superadmin']}><AdminShell superadmin /></RoleGuard>,
     children: [
-      { index: true, element: <SuperadminDashboardPage /> },
-      { path: 'companies', element: <CompaniesPage /> },
-      { path: 'companies/:id', element: <CompanyDetailPage /> },
+      { index: true, element: withSuspense(<SuperadminDashboardPage />) },
+      { path: 'companies', element: withSuspense(<CompaniesPage />) },
+      { path: 'companies/:id', element: withSuspense(<CompanyDetailPage />) },
     ],
   },
 
